@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Profile / User Login</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            animation: backgroundAnimate 10s infinite alternate;
+        }
+
+        @keyframes backgroundAnimate {
+            0% { background: linear-gradient(135deg, #74ebd5, #ACB6E5); }
+            100% { background: linear-gradient(135deg, #FFB6C1, #FF69B4); }
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px; /* Make it responsive */
+            text-align: center;
+            position: relative;
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.7rem 0;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            padding: 0.8rem;
+            width: 100%;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0056b3, #004080);
+            transform: translateY(-3px);
+        }
+
+        #message {
+            margin-top: 1rem;
+            color: red;
+        }
+
+        .spinner {
+            display: none;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #007bff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 90%;
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            input, button {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create Profile </h2>
+        <form id="user-form" method="post" action="{% url 'userprofile_create_unique' %}">
+
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <input type="text" id="mobile_number" name="mobile_number" placeholder="Mobile Number">
+            <button type="button" id="create-btn">Create Profile</button>
+            <button type="button" id="login-btn">Submit Data</button>
+            <div id="message"></div>
+            <div class="spinner" id="spinner"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('create-btn').addEventListener('click', function() {
+            handleForm('create');
+        });
+        document.getElementById('login-btn').addEventListener('click', function() {
+            handleForm('submit_data');
+        });
+
+        function handleForm(action) {
+            document.getElementById('spinner').style.display = 'block';
+            const formData = new FormData(document.getElementById('user-form'));
+            formData.append('action', action);
+
+            fetch('{% url "userprofile_create_unique" %}', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('message').textContent = data.message;
+                if (data.success && action === 'submit_data') {
+                    window.location.href = '/'; // Redirect on successful login
+                }
+            })
+            .catch(error => {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('message').textContent = 'An error occurred.';
+            });
+        }
+    </script>
+</body>
+</html>
